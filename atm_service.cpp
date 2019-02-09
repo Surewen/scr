@@ -1,3 +1,14 @@
-int atm_service(){
+int atm_service()
+{
 	
+}
+
+int withdraw()
+{
+
+}
+
+int deposit()
+{
+
 }
