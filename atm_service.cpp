@@ -31,14 +31,14 @@ int atm_service()
 			cin >> key_pressed;
 			switch(key_pressed)
 			{
-				case 1:
+				case 1: // show balance
 				break;
-				case 2:
+				case 2: // withdraw cash
 				break;
-				case 3:
+				case 3: // deposit cash
 				break;
-				case 4:
-				break;
+				case 4: // quit
+				exit(0);
 				break;
 				default:
 				break;
