@@ -6,13 +6,19 @@
 using namespace std;
 bool service_running = true;
 
-
+int card_number;
+int pin;
+int balance;
 
 int withdraw();
 int deposit();
 int draw_menu();
 int init_service();
+int get_balance();
+int login();
 bool pin_check(int pin);
+
+
 
 int atm_service()
 {
@@ -27,10 +33,11 @@ int atm_service()
 		if(delta_time > 500)
 		{
 			previous_time = time(0);
+			//-------------------
 			//ALL LOGIC GOES HERE
+			pin = login();
 
-
-			if(pin_check(1234))
+			if(pin_check(pin))
 			{
 				draw_menu();
 				char key_pressed;
@@ -50,7 +57,8 @@ int atm_service()
 					break;
 				}
 			}
-			
+			//END OF LOGIC
+			//------------
 		}
 		current_time = time(0);
 		delta_time = current_time - previous_time;
@@ -96,4 +104,17 @@ bool pin_check(int pin)
     {
     	return false;
     }
+}
+
+int get_balance()
+{
+
+}
+
+int login()//returns user PIN
+{
+	cout << "Please Enter Your Card Number\n> ";
+	cin >> card_number;
+	//TODO: get PIN from bank
+	return 0;
 }
