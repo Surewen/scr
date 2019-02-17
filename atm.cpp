@@ -13,11 +13,13 @@ int main(int argc, char const *argv[])
 	{
 		//Communication process
 		atm_communication();
+		return 0;
 	}
 	else if (communications_pid > 0)
 	{
 		//Service process
 		atm_service();
+		return 0;
 	}
 	else
 	{
