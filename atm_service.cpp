@@ -57,6 +57,10 @@ int atm_service()
 					break;
 				}
 			}
+			else
+			{
+				std::cout << "Wrong PIN, try again";
+			}
 			//END OF LOGIC
 			//------------
 		}
