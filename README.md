@@ -1,6 +1,6 @@
 # Projekt na SCR
 
-## Kompilacja
+### Kompilacja
 ```
 ./compile.sh
 ```
