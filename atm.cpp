@@ -15,23 +15,20 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-	
-	int pipeStatus;
-	int pipeOutput[2]; // file descriptor
 
-	pipeStatus = pipe(pipeOutput); // create output read/write pipe ends
-	if (pipeStatus < 0) {
-	std::cerr << "ERROR CREATING PIPE" << std::endl;
-	exit(1);
-	}
+	string host="0.0.0.0";
 	
+    if (argc > 1) { 	
+	host=argv[1];
+	string port="10000";
+
 	pid_t communications_pid = fork();
 	
 	if(communications_pid == 0)
 	{
 		//Communication process
 		Thread::sleep(100);
-		atm_communication *communicator = new atm_communication;
+		atm_communication *communicator = new atm_communication(host);
 		communicator->start();
 
 	}
@@ -48,6 +45,14 @@ int main(int argc, char *argv[])
 	}
 	while(1);
 	return 0;
+		
+		
+		}else{
+			cout<<"No argument! ./atm <ip-adress>"<<endl;
+			return 0;
+		}
+	
+	
 	
 	
 	

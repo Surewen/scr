@@ -24,7 +24,9 @@ private:
 	uint32 ssrc;
 	
 public:
-	atm_communication(){
+	string host;
+	
+	atm_communication(string bank_adr){
 		local_ip = "127.0.0.1";
 		if( ! local_ip ){  
 			cerr << "Rx: IP address is not correct!" << endl;
@@ -32,6 +34,7 @@ public:
 		}
 		socket = new RTPSession(local_ip,RECEIVER_BASE);
 		ssrc = socket->getLocalSSRC();
+		host=bank_adr;
 	}
 	~atm_communication(){
 		terminate();
@@ -40,6 +43,10 @@ public:
 	int fd[2];
 	
 	void run(void){    
+		//BANK ADRESS-------
+		
+		//------------------
+		
 		socket->setExpireTimeout(3000000);
 		socket->setPayloadFormat(StaticPayloadFormat(sptMP2T));
 		socket->startRunning();
@@ -53,9 +60,8 @@ public:
 		char buf2[50];
 		mkfifo(myfifo2, 0666); 
 
-
-		char host[]="127.0.0.1";
-		char port[]="10000";
+		
+		
 			
 		for( int i = 0 ; true ; i++ ){
 
@@ -63,7 +69,7 @@ public:
 			read(fd, buf, 50); 
 			close(fd); 
 
-			sendToBank(buf,host,port);
+			sendToBank(buf,host);
 			
 			const AppDataUnit *adu = NULL;
 			while ( NULL == adu ) {
@@ -90,12 +96,79 @@ public:
 			
 		}
 	}
-	void sendToBank(char data[],char host[],char port[]){
+	
+	void sendToBank(char message[],string adress){
+		
+		
 	
 	char timestamp[]="1";
 	char count[]="1";
 	
-    Sender sender((unsigned char *)data, InetHostAddress(host),
-        atoi(port), atoi(timestamp), atoi(count));
+	//ATM ADRESS-------
+	char port[]="10000";
+	char host[]="0.0.0.0";
+	char host1[]="0.0.0.0";
+	char host2[]="00.0.0.0";
+	char host3[]="000.0.0.0";
+	char host4[]="000.00.0.0";
+	
+	char host5[]="000.000.0.0";
+	char host6[]="000.000.00.0";
+	char host7[]="000.000.000.0";
+	char host8[]="000.000.000.00";
+	char host9[]="000.000.000.000";
+
+	int size=adress.size();
+	if(size==7){
+		strcpy(host1, adress.c_str());
+		Sender sender((unsigned char *)message, InetHostAddress(host1),
+		atoi(port), atoi(timestamp), atoi(count));
+	}else
+	if(size==8){
+		strcpy(host2, adress.c_str());
+		Sender sender((unsigned char *)message, InetHostAddress(host2),
+    atoi(port), atoi(timestamp), atoi(count));
+	}else
+	if(size==9){
+		strcpy(host3, adress.c_str());
+		Sender sender((unsigned char *)message, InetHostAddress(host3),
+    atoi(port), atoi(timestamp), atoi(count));
+	}else
+	if(size==10){
+		strcpy(host4, adress.c_str());
+		Sender sender((unsigned char *)message, InetHostAddress(host4),
+    atoi(port), atoi(timestamp), atoi(count));
+	}else
+	if(size==11){
+		strcpy(host5, adress.c_str());
+		Sender sender((unsigned char *)message, InetHostAddress(host5),
+    atoi(port), atoi(timestamp), atoi(count));
+	}else
+	if(size==12){
+		strcpy(host6, adress.c_str());
+		Sender sender((unsigned char *)message, InetHostAddress(host6),
+    atoi(port), atoi(timestamp), atoi(count));
+	}else
+	if(size==13){
+		strcpy(host7, adress.c_str());
+		Sender sender((unsigned char *)message, InetHostAddress(host7),
+    atoi(port), atoi(timestamp), atoi(count));
+	}else
+	if(size==14){
+		strcpy(host8, adress.c_str());
+		Sender sender((unsigned char *)message, InetHostAddress(host8),
+    atoi(port), atoi(timestamp), atoi(count));
+	}else
+	if(size==15){
+		strcpy(host9, adress.c_str());
+		Sender sender((unsigned char *)message, InetHostAddress(host9),
+    atoi(port), atoi(timestamp), atoi(count));
+	}else
+	{
+		Sender sender((unsigned char *)message, InetHostAddress(host),
+    atoi(port), atoi(timestamp), atoi(count));
+	}
+
+        
 	}
 };

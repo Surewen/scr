@@ -42,15 +42,80 @@ private:
     const uint16 packetsPerSecond;
 };
 
-void send(char message[]){
-	
-	char host[]="127.0.0.1";
+void send(char message[],string adress){
+	//ATM ADRESS-------
 	char port[]="11000";
 	char timestamp[]="10";
 	char count[]="1";
+	char host[]="0.0.0.0";
+	char host1[]="0.0.0.0";
+	char host2[]="00.0.0.0";
+	char host3[]="000.0.0.0";
+	char host4[]="000.00.0.0";
 	
-    Sender sender((unsigned char *)message, InetHostAddress(host),
-        atoi(port), atoi(timestamp), atoi(count));
+	char host5[]="000.000.0.0";
+	char host6[]="000.000.00.0";
+	char host7[]="000.000.000.0";
+	char host8[]="000.000.000.00";
+	char host9[]="000.000.000.000";
+
+	int size=adress.size();
+	if(size==7){
+		strcpy(host1, adress.c_str());
+		Sender sender((unsigned char *)message, InetHostAddress(host1),
+		atoi(port), atoi(timestamp), atoi(count));
+	}else
+	if(size==8){
+		strcpy(host2, adress.c_str());
+		Sender sender((unsigned char *)message, InetHostAddress(host2),
+    atoi(port), atoi(timestamp), atoi(count));
+	}else
+	if(size==9){
+		strcpy(host3, adress.c_str());
+		Sender sender((unsigned char *)message, InetHostAddress(host3),
+    atoi(port), atoi(timestamp), atoi(count));
+	}else
+	if(size==10){
+		strcpy(host4, adress.c_str());
+		Sender sender((unsigned char *)message, InetHostAddress(host4),
+    atoi(port), atoi(timestamp), atoi(count));
+	}else
+	if(size==11){
+		strcpy(host5, adress.c_str());
+		Sender sender((unsigned char *)message, InetHostAddress(host5),
+    atoi(port), atoi(timestamp), atoi(count));
+	}else
+	if(size==12){
+		strcpy(host6, adress.c_str());
+		Sender sender((unsigned char *)message, InetHostAddress(host6),
+    atoi(port), atoi(timestamp), atoi(count));
+	}else
+	if(size==13){
+		strcpy(host7, adress.c_str());
+		Sender sender((unsigned char *)message, InetHostAddress(host7),
+    atoi(port), atoi(timestamp), atoi(count));
+	}else
+	if(size==14){
+		strcpy(host8, adress.c_str());
+		Sender sender((unsigned char *)message, InetHostAddress(host8),
+    atoi(port), atoi(timestamp), atoi(count));
+	}else
+	if(size==15){
+		strcpy(host9, adress.c_str());
+		Sender sender((unsigned char *)message, InetHostAddress(host9),
+    atoi(port), atoi(timestamp), atoi(count));
+	}else
+	{
+		Sender sender((unsigned char *)message, InetHostAddress(host),
+    atoi(port), atoi(timestamp), atoi(count));
+	}
+	
+	
+	//------------------
+	
+	
+	
+    
 }
 
 class Listener: RTPSession
@@ -216,24 +281,25 @@ public:
         defaultApplication().setSDESItem(SDESItemTypeTOOL,"rtplisten demo app.");
         setExpireTimeout(1000000);
         setPayloadFormat(StaticPayloadFormat(sptPCMU));
-        
         startRunning();
+        stringstream ad_buffer;
+        string adresstring;
         
         
         for (;;) {
             const AppDataUnit* adu;
             while ( (adu = getData(getFirstTimestamp())) ) {
 				
-				//adu->getData - sprawdzenie co to za dane
-				
-				/*
-                cerr << "Request from: "
-                     << dec <<
-                    adu->getSource().getNetworkAddress()
-                     << ":"
-                     << adu->getSource().getDataTransportPort()<<endl;
-                     */
-                     
+
+					
+					ad_buffer.clear();
+					
+                     ad_buffer.str(string());
+                     ad_buffer<< adu->getSource().getNetworkAddress();
+                     adresstring = ad_buffer.str();
+
+
+                    
                      stringstream loglinestream;
                      
                      loglinestream<< "Request from: "
@@ -422,7 +488,7 @@ public:
 				 cout<<logline;
                  add_log(logline);
                  
-                 send(message);    
+                 send(message,adresstring);    
 
                  
                 delete adu;
