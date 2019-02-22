@@ -4,10 +4,10 @@
 ./compile.sh
 
 ### bank
-./bank
+./bank <adres_wlasny>
 
 ### atm
-./atm
+./atm <adres_wlasny> <adres_banku>
 Ma 2 procesy - komunikacja z bankiem i obsługa klienta (odpowiednio atm_communication i atm_service)
 ```
 atm
