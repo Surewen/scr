@@ -500,11 +500,11 @@ public:
     
 
 };
-void startListening(){
+void startListening(string myip){
 	
 	InetMcastAddress ima;
     try {
-        ima = InetMcastAddress("127.0.0.1");
+        ima = InetMcastAddress(myip.c_str());
     } catch (...) { }
 
     Listener *foo;
@@ -512,7 +512,7 @@ void startListening(){
     if ( ima.isInetAddress() ) {
         foo = new Listener(ima,port);
     } else {
-        InetHostAddress ia("127.0.0.1");
+        InetHostAddress ia(myip.c_str());
         foo = new Listener(ia,atoi("10000"));
     }
     foo->listen();
@@ -520,8 +520,12 @@ void startListening(){
 	
 }
 int main(int argc, char *argv[]){
-    startListening();
-    
+	string host;
+	if (argc > 1) { 	
+	host=argv[1];
+
+    startListening(host);
+}
     return 0;
 }
 

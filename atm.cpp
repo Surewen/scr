@@ -17,9 +17,11 @@ int main(int argc, char *argv[])
 {
 
 	string host="0.0.0.0";
+	string my_ip="127.0.0.1";
 	
-    if (argc > 1) { 	
-	host=argv[1];
+    if (argc > 2) { 	
+	my_ip=argv[1];
+	host=argv[2];
 	string port="10000";
 
 	pid_t communications_pid = fork();
@@ -28,7 +30,7 @@ int main(int argc, char *argv[])
 	{
 		//Communication process
 		Thread::sleep(100);
-		atm_communication *communicator = new atm_communication(host);
+		atm_communication *communicator = new atm_communication(my_ip,host);
 		communicator->start();
 
 	}

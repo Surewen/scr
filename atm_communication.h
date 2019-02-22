@@ -26,8 +26,8 @@ private:
 public:
 	string host;
 	
-	atm_communication(string bank_adr){
-		local_ip = "127.0.0.1";
+	atm_communication(string my_ip,string bank_adr){
+		local_ip = my_ip.c_str();
 		if( ! local_ip ){  
 			cerr << "Rx: IP address is not correct!" << endl;
 			exit();
