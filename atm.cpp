@@ -54,21 +54,6 @@ int main(int argc, char *argv[])
 			return 0;
 		}
 	
-	
-	
-	
-	
-	/*
-	
-	char data[]="Witam";
-	char host[]="127.0.0.1";
-	char port[]="10000";
-	sendToBank(data,host,port);
-	
-	while(true);
-	
-    return 0;
-    */
 }
 
 

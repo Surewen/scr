@@ -45,13 +45,10 @@ public:
 	{
 		if(delta_time > 5)
 		{
-
 			previous_time = time(0);
-			//-------------------
-			//ALL LOGIC GOES HERE
 			abc:
 			system("clear");
-			
+		
 			login();
 			
 			if(pin_check(pin))
@@ -123,14 +120,16 @@ public:
 		string user_input_pin;
 		cout << "Please Enter Your 4 Digit PIN\n> ";
 		cin >> user_input_pin;
-		//KOMUNIKACJA Z PROCESEM KOMUNIKACJ
-		//WYSLANIE PROSBY O PIN
 		
+		
+		//Utworzenie zadania do wyslania do banku
 		string temp = "";
 		temp="1:"+card_number+string(":");
 		char buf[30];  
 		strcpy(buf, temp.c_str());  
 				  
+		//KOMUNIKACJA Z PROCESEM KOMUNIKACJ
+		//WYSLANIE PROSBY O PIN
 		int fd; 
 		char const * myfifo = "./myfifo"; 
 		mkfifo(myfifo, 0666); 
@@ -139,7 +138,7 @@ public:
         close(fd); 
         
 		
-		//ZWROTNY KOMUNIKAT
+		//ZWROTNY KOMUNIKAT odczytany z PIPE'a od procesu komunikacji
 		int fd2; 
 		char const * myfifo2 = "./myfifo2"; 
 		char buf2[30];
@@ -147,30 +146,32 @@ public:
 		fd2 = open(myfifo2,O_RDONLY); 
 		read(fd2, buf2, 30); 
 		close(fd2); 
+		
+		
+		
 		string message(buf2); //cala wiadomosc od banku
 		
+				//wybranie pierwszej skladowej (numer rozkazu)
 				size_t pos = 0;
 				string delimiter = ":";
 				string command_string = message.substr(0, temp.find(delimiter));
 				command_string.substr(pos + delimiter.length());
 				message.erase(0, message.find(delimiter) + delimiter.length());
-				char command_buf[1];
+				
+				char command_buf[1];//Zmienna przechowujaca numer rozkazu
 				strcpy(command_buf, command_string.c_str()); 
+				
+				//Sprawdzenie czy to wiadomosc przekazujaca PIN uzytkownika
 				if(command_buf[0]=='2'){
+					//Wybranie PIN'u z wiadomosci
 					size_t pos = 0;
 					pos = message.find(delimiter);
 					pin = message.substr(0, pos);
 					message.erase(0, pos + delimiter.length());
-					//-----------------------------------
 
 				}
 		
-		
-		
-		//
-		
-		//pin="0";
-		
+		//Porownanie PINu
 		if(user_input_pin.compare(pin) == 0)
 		{
 			return true;
@@ -183,11 +184,14 @@ public:
 	void your_balance(){
 
 		//KOMUNIKACJA Z PROCESEM KOMUNIKACJ
-		//WYSLANIE PROSBY O SALDO W GET_BALANCE
+		
+		//Utworzenie zadania do wyslania do banku
 		string temp = "";
 		temp="3:"+card_number+string(":");
 		char buf[30];  
 		strcpy(buf, temp.c_str());  
+		
+		//WYSLANIE wiadomosci do banku przez PIPE'a do procesu komunikacji
 		int fd; 
 		char const * myfifo = "./myfifo"; 
 		mkfifo(myfifo, 0666); 
@@ -195,7 +199,8 @@ public:
         write(fd, buf, strlen(buf)+1); 
         close(fd); 
         Thread::sleep(50);
-        //KOMUNIKAT ZWROTNY
+        
+        //ZWROTNY KOMUNIKAT odczytany z PIPE'a od procesu komunikacji
         int fd2; 
 		char const * myfifo2 = "./myfifo2"; 
 		char buf2[30];
@@ -205,15 +210,17 @@ public:
 		close(fd2); 
 		string message(buf2); //cala wiadomosc od banku
 	
-		
+				//wybranie pierwszej skladowej (numer rozkazu)
 				size_t pos = 0;
 				string delimiter = ":";
 				string command_string = message.substr(0, temp.find(delimiter));
 				command_string.substr(pos + delimiter.length());
 				message.erase(0, message.find(delimiter) + delimiter.length());
-				char command_buf[1];
+				char command_buf[1];//Zmienna przechowujaca numer rozkazu
 				strcpy(command_buf, command_string.c_str()); 
+				
 				if(command_buf[0]=='4'){
+					//wybranie drugiej skladowej rozkazu nr 4 : saldo
 					size_t pos = 0;
 					pos = message.find(delimiter);
 					string account_num = message.substr(0, pos);
@@ -221,11 +228,8 @@ public:
 					pos = message.find(delimiter);
 					amount = message.substr(0, pos);
 					message.erase(0, pos + delimiter.length());
-					//-----------------------------------
-
 				}
 		
-        //---------------
 		cout<<"Your balance: "+amount<<endl<<endl;
 		cout<<"Press enter to continue"<<endl;
 		cin.ignore();
@@ -242,22 +246,24 @@ public:
 		if(key_pressed=='y'){
 			cout<<"Withdrawing: ";
 			cout<<amount<<endl;
-			//KOMUNIKACJA Z PROCESEM KOMUNIKACJ
-			//WYSLANIE PROSBY O WYPLACENIE HAJSU
+			
+			//Utworzenie zadania do wyslania do banku
 			string temp = "";
 			temp="5:"+card_number+":"+to_string(amount)+string(":");
 			char buf[30];  
 			strcpy(buf, temp.c_str());  
-					  
+			
+			//KOMUNIKACJA Z PROCESEM KOMUNIKACJ
+			
+			//WYSLANIE wiadomosci do banku przez PIPE'a do procesu komunikacji  
 			int fd; 
 			char const * myfifo = "./myfifo"; 
 			mkfifo(myfifo, 0666); 
-			// Open FIFO for write only 
 			fd = open(myfifo, O_WRONLY); 
 			write(fd, buf, strlen(buf)+1); 
 			close(fd); 
 			
-			//KOMUNIKAT ZWROTNY
+			//ZWROTNY KOMUNIKAT odczytany z PIPE'a od procesu komunikacji
 			int fd2; 
 			char const * myfifo2 = "./myfifo2"; 
 			char buf2[30];
@@ -266,18 +272,20 @@ public:
 			read(fd2, buf2, 30); 
 			close(fd2); 
 			string message(buf2);//cala wiadomosc od banku
-
+				
+				//wybranie pierwszej skladowej (numer rozkazu)
 				size_t pos = 0;
 				string delimiter = ":";
 				string command_string = message.substr(0, temp.find(delimiter));
 				command_string.substr(pos + delimiter.length());
 				message.erase(0, message.find(delimiter) + delimiter.length());
-				char command_buf[1];
+				char command_buf[1];//Zmienna przechowujaca numer rozkazu
 				strcpy(command_buf, command_string.c_str()); 
-				if(command_buf[0]=='7'){
+				
+				if(command_buf[0]=='7'){//Numer rozkazu 7 - operacja udana
 				cout<<"Operation succesful!"<<endl;
 				}else 
-				if(command_buf[0]=='8'){
+				if(command_buf[0]=='8'){//Numer rozkazu 8 - operacja nieudana
 				cout<<"Operation failed!"<<endl;		
 				}
 				
@@ -301,22 +309,24 @@ public:
 		if(key_pressed=='y'){
 			cout<<"Depositing: ";
 			cout<<amount<<endl;
-			//KOMUNIKACJA Z PROCESEM KOMUNIKACJ
-			//WYSLANIE PROSBY O WPLACENIE HAJSU
+			
+			//Utworzenie zadania do wyslania do banku
 			string temp = "";
 			temp="6:"+card_number+":"+to_string(amount)+string(":");
 			char buf[30];  
 			strcpy(buf, temp.c_str());  
-					  
+			
+			//KOMUNIKACJA Z PROCESEM KOMUNIKACJ
+			
+			//WYSLANIE wiadomosci do banku przez PIPE'a do procesu komunikacji	  
 			int fd; 
 			char const * myfifo = "./myfifo"; 
 			mkfifo(myfifo, 0666); 
-			// Open FIFO for write only 
 			fd = open(myfifo, O_WRONLY); 
 			write(fd, buf, strlen(buf)+1); 
 			close(fd); 
 			
-			//KOMUNIKAT ZWROTNY
+			//ZWROTNY KOMUNIKAT odczytany z PIPE'a od procesu komunikacji
 			int fd2; 
 			char const * myfifo2 = "./myfifo2"; 
 			char buf2[30];
@@ -326,17 +336,19 @@ public:
 			close(fd2); 
 			string message(buf2);//cala wiadomosc od banku
 			
-			size_t pos = 0;
+				//wybranie pierwszej skladowej (numer rozkazu)
+				size_t pos = 0;
 				string delimiter = ":";
 				string command_string = message.substr(0, temp.find(delimiter));
 				command_string.substr(pos + delimiter.length());
 				message.erase(0, message.find(delimiter) + delimiter.length());
-				char command_buf[1];
+				char command_buf[1];//Zmienna przechowujaca numer rozkazu
 				strcpy(command_buf, command_string.c_str()); 
-				if(command_buf[0]=='7'){
+				
+				if(command_buf[0]=='7'){//Numer rozkazu 7 - operacja udana
 				cout<<"Operation succesful!"<<endl;
 				}else 
-				if(command_buf[0]=='8'){
+				if(command_buf[0]=='8'){//Numer rozkazu 8 - operacja nieudana
 				cout<<"Operation failed!"<<endl;		
 				}
 			
@@ -361,22 +373,23 @@ public:
 		if(key_pressed=='y'){
 			cout<<"Transfering: ";
 			cout<<amount<<endl;
-			//KOMUNIKACJA Z PROCESEM KOMUNIKACJ
-			//WYSLANIE PROSBY O TRANSFER HAJSU
+			//KOMUNIKACJA Z PROCESEM KOMUNIKACJI
+			
+			//Utworzenie zadania do wyslania do banku
 			string temp = "";
 			temp="9:"+card_number+":"+account_number_transfer+":"+to_string(amount)+string(":");
 			char buf[50];  
 			strcpy(buf, temp.c_str());  
-					  
+			
+			//WYSLANIE wiadomosci do banku przez PIPE'a do procesu komunikacji
 			int fd; 
 			char const * myfifo = "./myfifo"; 
 			mkfifo(myfifo, 0666); 
-			// Open FIFO for write only 
 			fd = open(myfifo, O_WRONLY); 
 			write(fd, buf, strlen(buf)+1); 
 			close(fd); 
 			
-			//KOMUNIKAT ZWROTNY
+			//ZWROTNY KOMUNIKAT odczytany z PIPE'a od procesu komunikacji
 			int fd2; 
 			char const * myfifo2 = "./myfifo2"; 
 			char buf2[50];
@@ -384,24 +397,25 @@ public:
 			fd2 = open(myfifo2,O_RDONLY); 
 			read(fd2, buf2, 50); 
 			close(fd2); 
-			string message(buf2); //cala wiadomosc od banku
 			
-			size_t pos = 0;
+			string message(buf2); //cala wiadomosc od banku
+				
+				//wybranie pierwszej skladowej (numer rozkazu)
+				size_t pos = 0;
 				string delimiter = ":";
 				string command_string = message.substr(0, temp.find(delimiter));
 				command_string.substr(pos + delimiter.length());
 				message.erase(0, message.find(delimiter) + delimiter.length());
-				char command_buf[1];
+				char command_buf[1];//Zmienna przechowujaca numer rozkazu
 				strcpy(command_buf, command_string.c_str()); 
-				if(command_buf[0]=='7'){
+				
+				if(command_buf[0]=='7'){//Numer rozkazu 7 - operacja udana
 				cout<<"Operation succesful!"<<endl;
 				}else 
-				if(command_buf[0]=='8'){
+				if(command_buf[0]=='8'){//Numer rozkazu 8 - operacja nieudana
 				cout<<"Operation failed!"<<endl;		
 				}
-			
-			
-			//---------------
+
 			}else if(key_pressed=='n'){
 			cout<<"Aborting operation!"<<endl;
 			}
@@ -410,17 +424,10 @@ public:
 		cin.get();
 		
 	}
-	int get_balance()
-	{
-	//KOMUNIKACJA Z PROCESEM KOMUNIKACJI
-		
-	return 0;
-	}
 
 	void login()//returns user PIN
 	{
 		cout << "Please Enter Your Card Number\n> ";
 		cin >> card_number;
-		//TODO: get PIN from bank
 	}
 };

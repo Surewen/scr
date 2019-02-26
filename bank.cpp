@@ -7,6 +7,7 @@
 using namespace ost;
 using namespace std;
 #endif
+//Klasa odpowiedzialna za zestawienie zesji RTP ze wskazanym hostem i przeslanie danych
 class Sender: public RTPSession, public TimerPort
 {
 public:
@@ -23,10 +24,8 @@ public:
             cerr << "Could not connect" << endl;
             exit();
         }
-
         setPayloadFormat(StaticPayloadFormat(sptPCMU));
         startRunning();
-
         uint16 tstampInc = getCurrentRTPClockRate()/packetsPerSecond;
         uint32 period = 1000/packetsPerSecond;
         TimerPort::setTimer(period);
@@ -42,80 +41,15 @@ private:
     const uint16 packetsPerSecond;
 };
 
-void send(char message[],string adress){
-	//ATM ADRESS-------
-	char port[]="11000";
+void send(char message[],string adress){ //metoda do przeslania danych na podany adres IP
+
+	
+	char port[]="11000"; //Port na ktorym pracuja bankomaty
 	char timestamp[]="10";
 	char count[]="1";
-	char host[]="0.0.0.0";
-	char host1[]="0.0.0.0";
-	char host2[]="00.0.0.0";
-	char host3[]="000.0.0.0";
-	char host4[]="000.00.0.0";
-	
-	char host5[]="000.000.0.0";
-	char host6[]="000.000.00.0";
-	char host7[]="000.000.000.0";
-	char host8[]="000.000.000.00";
-	char host9[]="000.000.000.000";
-
-	int size=adress.size();
-	if(size==7){
-		strcpy(host1, adress.c_str());
-		Sender sender((unsigned char *)message, InetHostAddress(host1),
-		atoi(port), atoi(timestamp), atoi(count));
-	}else
-	if(size==8){
-		strcpy(host2, adress.c_str());
-		Sender sender((unsigned char *)message, InetHostAddress(host2),
+	//Utworzenie obiektu odpowiedzialnego za utworzenie sesji RTP i wyslanie danych
+	Sender sender((unsigned char *)message, InetHostAddress(adress.c_str()),
     atoi(port), atoi(timestamp), atoi(count));
-	}else
-	if(size==9){
-		strcpy(host3, adress.c_str());
-		Sender sender((unsigned char *)message, InetHostAddress(host3),
-    atoi(port), atoi(timestamp), atoi(count));
-	}else
-	if(size==10){
-		strcpy(host4, adress.c_str());
-		Sender sender((unsigned char *)message, InetHostAddress(host4),
-    atoi(port), atoi(timestamp), atoi(count));
-	}else
-	if(size==11){
-		strcpy(host5, adress.c_str());
-		Sender sender((unsigned char *)message, InetHostAddress(host5),
-    atoi(port), atoi(timestamp), atoi(count));
-	}else
-	if(size==12){
-		strcpy(host6, adress.c_str());
-		Sender sender((unsigned char *)message, InetHostAddress(host6),
-    atoi(port), atoi(timestamp), atoi(count));
-	}else
-	if(size==13){
-		strcpy(host7, adress.c_str());
-		Sender sender((unsigned char *)message, InetHostAddress(host7),
-    atoi(port), atoi(timestamp), atoi(count));
-	}else
-	if(size==14){
-		strcpy(host8, adress.c_str());
-		Sender sender((unsigned char *)message, InetHostAddress(host8),
-    atoi(port), atoi(timestamp), atoi(count));
-	}else
-	if(size==15){
-		strcpy(host9, adress.c_str());
-		Sender sender((unsigned char *)message, InetHostAddress(host9),
-    atoi(port), atoi(timestamp), atoi(count));
-	}else
-	{
-		Sender sender((unsigned char *)message, InetHostAddress(host),
-    atoi(port), atoi(timestamp), atoi(count));
-	}
-	
-	
-	//------------------
-	
-	
-	
-    
 }
 
 class Listener: RTPSession
@@ -277,31 +211,28 @@ public:
 	
     void listen()
     {
-		char message[50];
         defaultApplication().setSDESItem(SDESItemTypeTOOL,"rtplisten demo app.");
         setExpireTimeout(1000000);
         setPayloadFormat(StaticPayloadFormat(sptPCMU));
         startRunning();
-        stringstream ad_buffer;
-        string adresstring;
+        
+		char message[50];//Zmienna przechowujaca tworzona wiadomosc dla bankomatu
+        stringstream ad_buffer;//Bufor przechowujacy adres IP bankomatu ktoremu nalezy odpowiedziec
+        string adresstring;//String z w.w. adresem
         
         
         for (;;) {
             const AppDataUnit* adu;
             while ( (adu = getData(getFirstTimestamp())) ) {
-				
-
-					
-					ad_buffer.clear();
-					
+					 
+					 //Pobranie adresu IP bankomatu wysylajacego zadanie do banku
+					 ad_buffer.clear();
                      ad_buffer.str(string());
                      ad_buffer<< adu->getSource().getNetworkAddress();
                      adresstring = ad_buffer.str();
 
-
-                    
-                     stringstream loglinestream;
-                     
+					//sstream zawierajacy linijke ktora zostanie wpisana do logu/wyswietlona na terminalu banku
+                     stringstream loglinestream; 
                      loglinestream<< "Request from: "
                      << dec <<
 					 adu->getSource().getNetworkAddress()
@@ -309,61 +240,55 @@ public:
                      << adu->getSource().getDataTransportPort()<<" ";
                      string logline=loglinestream.str();
 
-
-                     stringstream buffer;
+				//bufor dla danych przesylanych przez bankomat przy uzyciu RTP
+                stringstream buffer;
 				buffer<< hex << adu->getData()<<endl;
-				string temp = buffer.str();
-				//mozna podzielic tutaj stringa na skladowe i do tablic char powsadzac odpowiednie pola lub pozamieniac na liczby nawet
+				string temp = buffer.str(); //tymczasowy string z ktorego wybierane beda skladowe zawarte w rozkazie
 				
+				//zmienne pomocnicze do przechowywania danych
+				char command_buf[1];
+				string account_number;
+				string amount;
+				string account_number2;
+				
+				//wybranie pierwszej skladowej (numer rozkazu)
 				size_t pos = 0;
 				string delimiter = ":";
 				string command_string = temp.substr(0, temp.find(delimiter));
 				command_string.substr(pos + delimiter.length());
 				temp.erase(0, temp.find(delimiter) + delimiter.length());
-				
-				string account_number;
-				string amount;
-				string account_number2;
+				strcpy(command_buf, command_string.c_str());
 
-				char command_buf[1];  
-				strcpy(command_buf, command_string.c_str());  
-				//Po odebraniu danych nalezy je zdekodowac i wykonac odpowiednia akcje:
-				if(command_buf[0]=='1'){
+				//dzialania na podstawie numeru rozkazu
+				if(command_buf[0]=='1'){//AUTORYZACJA
 					
-					//numer konta
+					//Wybranie z przeslanych danych numeru konta
 					size_t pos = 0;
 					pos = temp.find(delimiter);
 					account_number = temp.substr(0, pos);
 					temp.erase(0, pos + delimiter.length());
-					
-					
-                     loglinestream<<"PIN request for account: "+account_number+". Sending PIN: "+get_pin(account_number)<<endl;
-                     logline=loglinestream.str();
-                      
-                     
-					//cout<<"PIN request for account: "+account_number+". Sending PIN: "+get_pin(account_number)<<endl;
-					
+                    loglinestream<<"PIN request for account: "+account_number+". Sending PIN: "+get_pin(account_number)<<endl;
+                    logline=loglinestream.str();
 					//Odeslanie PIN o danym numerze konta
 					string data = "2:";
 					data=data+get_pin(account_number)+string(":");
 					strcpy(message, data.c_str());
-					//getpin
-					
 					//-----------------------------------
 
 				}else 
-				if(command_buf[0]=='3'){
+				if(command_buf[0]=='3'){//SALDO
 					
-					//numer konta
+					//Wybranie z przeslanych danych numeru konta
 					size_t pos = 0;
 					pos = temp.find(delimiter);
 					account_number = temp.substr(0, pos);
-					
-					loglinestream<<"Request balance for account: "+account_number+" Sending current balance: "+get_balance(account_number)<<endl;
-                     logline=loglinestream.str();
-                    
-                     
 					temp.erase(0, pos + delimiter.length());
+					
+					//Wstawienie danych do zmiennej tworzacej log
+					loglinestream<<"Request balance for account: "+account_number+" Sending current balance: "+get_balance(account_number)<<endl;
+                    logline=loglinestream.str();
+					
+					
 					//Odeslanie salda o danym numerze konta
 					string data = "4:";
 					data=data+account_number+string(":")+get_balance(account_number)+string(":");
@@ -371,38 +296,42 @@ public:
 					//-----------------------------------
 					
 				}else 
-				if(command_buf[0]=='5'){
+				if(command_buf[0]=='5'){//WYPLATA
 					
-					//numer konta
+					//Wybranie z przeslanych danych numeru konta
 					size_t pos = 0;
 					pos = temp.find(delimiter);
 					account_number = temp.substr(0, pos);
 					temp.erase(0, pos + delimiter.length());
 					
-					//kwota
+					//Wybranie z przeslanych danych kwoty
 					pos = temp.find(delimiter);
 					amount = temp.substr(0, pos);
 					temp.erase(0, pos + delimiter.length());
 					
+					//Wstawienie danych do zmiennej tworzacej log
 					loglinestream<<"Withdrawal request for account: "+account_number+" Amount: "+amount<<endl;
                      logline=loglinestream.str();
                    
                     
 					//Odeslanie potwierdzenia operacji
 					if(substract_balance(account_number,stoi(amount))){
+					//Wstawienie do danych do zmiennej tworzacej log
 					loglinestream<<"Operation success. Sending approval."<<endl;
                     logline=loglinestream.str();
                     cout<<logline<<endl;
                     
-		
+                    //Operacja udana
 					string data = "7:";
 					strcpy(message, data.c_str());
 					}else{
-				
+						
+					//Wstawienie do danych do zmiennej tworzacej log
 					loglinestream<<"Operation failed. Not enough funds."<<endl;
                     logline=loglinestream.str();
                     cout<<logline<<endl;
                     
+                    //Operacja nieudana
 					string data = "8:";
 					strcpy(message, data.c_str());
 					}
@@ -412,86 +341,87 @@ public:
 					
 					
 				}else 
-				if(command_buf[0]=='6'){
+				if(command_buf[0]=='6'){//WPLATA
 					
-					//numer konta
+					//Wybranie z przeslanych danych numeru konta
 					size_t pos = 0;
 					pos = temp.find(delimiter);
 					account_number = temp.substr(0, pos);
 					temp.erase(0, pos + delimiter.length());
 					
-					//kwota
+					//Wybranie z przeslanych danych kowty
 					pos = temp.find(delimiter);
 					amount = temp.substr(0, pos);
 					temp.erase(0, pos + delimiter.length());
 					
+					//Wstawienie danych do zmiennej tworzacej log
 					loglinestream<<"Deposit request for account: "+account_number+" Amount: "+amount<<endl;
                     logline=loglinestream.str();
                   
-					//Odeslanie potwierdzenia operacji
+                  
+					//Wykonanie operacji
 					add_balance(account_number,stoi(amount));
 					
+					//Wstawienie danych do zmiennej tworzacej log
 					loglinestream<<"Operation success. Sending approval."<<endl;
+					
                     logline=loglinestream.str();
-  
+					//Odeslanie potwierdzenia operacji
 					string data = "7:";
 					strcpy(message, data.c_str());
-					//-----------------------------------
 					
 					
 				}else 
-				if(command_buf[0]=='9'){
+				if(command_buf[0]=='9'){//PRZELEW
 
-					//numer konta
+					//Wybranie z przeslanych danych numeru konta
 					size_t pos = 0;
 					pos = temp.find(delimiter);
 					account_number = temp.substr(0, pos);
 					temp.erase(0, pos + delimiter.length());
 
-					//numer konta2
+					//Wybranie z przeslanych danych numeru konta docelowego
 					pos = temp.find(delimiter);
 					account_number2 = temp.substr(0, pos);
 					temp.erase(0, pos + delimiter.length());
 
-					//kwota
+					//Wybranie z przeslanych danych kwoty
 					pos = temp.find(delimiter);
 					amount = temp.substr(0, pos);
 					temp.erase(0, pos + delimiter.length());
 					
-					
+					//Wstawienie danych do zmiennej tworzacej log
 					loglinestream<<"Transfer request for account: "+account_number+" to: "+account_number2+" Amount: "+amount<<endl;
                     logline=loglinestream.str();
  
-					
+					//Wykonanie operacji przelewu
 					if(transfer(account_number,account_number2,stoi(amount))){
 						
+					//Wstawienie danych do zmiennej tworzacej log
 					loglinestream<<"Operation success. Sending approval."<<endl;
                     logline=loglinestream.str();
-
+						
+						//Operacja udana
 						string data = "7:";
 						strcpy(message, data.c_str());
 					}else{
-					
+						
+					//Wstawienie danych do zmiennej tworzacej log
 					loglinestream<<"Operation failed. Not enough funds."<<endl;
                     logline=loglinestream.str();
 
+						//Operacja nieudana
 						string data = "8:";
 						strcpy(message, data.c_str());
-					}
-					//Odeslanie potwierdzenia operacji
-					
-					//-----------------------------------
-					
-					
+					}	
 				}
-				
+				 //Wypisanie na ekran linijki logu oraz wstawienie do pliku log.txt
 				 cout<<logline;
                  add_log(logline);
                  
+                 //Wyslanie do bankomatu odpowiedzi
                  send(message,adresstring);    
-
-                 
-                delete adu;
+				 delete adu;
             }
             Thread::sleep(7);
         }
@@ -501,7 +431,7 @@ public:
 
 };
 void startListening(string myip){
-	
+	//Utworzenie odpowiedniego listenera
 	InetMcastAddress ima;
     try {
         ima = InetMcastAddress(myip.c_str());
@@ -520,12 +450,16 @@ void startListening(string myip){
 	
 }
 int main(int argc, char *argv[]){
+	
 	string host;
+	
 	if (argc > 1) { 	
+	//Adres IP ktory ma byc nasluchiwany
 	host=argv[1];
-
+	//Uruchomienie procesu banku
     startListening(host);
-}
+	}
+	
     return 0;
 }
 
