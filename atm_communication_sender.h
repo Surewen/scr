@@ -14,7 +14,8 @@ public:
         defaultApplication().setSDESItem(SDESItemTypeTOOL, "rtpsend demo app.");
         setSchedulingTimeout(10000);
         setExpireTimeout(1000000);
-        if ( !addDestination(ia,port) ) {
+        if ( !addDestination(ia,port) ) 
+        {
             cerr << "Could not connect" << endl;
             exit();
         }
@@ -23,7 +24,8 @@ public:
         uint16 tstampInc = getCurrentRTPClockRate()/packetsPerSecond;
         uint32 period = 1000/packetsPerSecond;
         TimerPort::setTimer(period);
-        for ( int i = 0; i < count ; i++ ) {
+        for ( int i = 0; i < count ; i++ ) 
+        {
             putData(timestamp + i*tstampInc,
                 data,strlen((char *)data) + 1);
             Thread::sleep(TimerPort::getTimer());
