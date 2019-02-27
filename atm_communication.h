@@ -26,10 +26,11 @@ private:
 public:
 	string host;
 	
-	atm_communication(string my_ip,string bank_adr){
-		
+	atm_communication(string my_ip,string bank_adr)
+	{
 		local_ip = my_ip.c_str();
-		if( ! local_ip ){  
+		if( ! local_ip )
+		{  
 			cerr << "Rx: IP address is not correct!" << endl;
 			exit();
 		}
@@ -37,13 +38,15 @@ public:
 		ssrc = socket->getLocalSSRC();
 		host=bank_adr;
 	}
-	~atm_communication(){
+	~atm_communication()
+	{
 		terminate();
 		delete socket;
 	}
 	int fd[2];
 	
-	void run(void){    
+	void run(void)
+	{    
 		//BANK ADRESS-------
 		
 		//------------------
@@ -65,7 +68,8 @@ public:
 		
 		
 			
-		for( int i = 0 ; true ; i++ ){
+		for( int i = 0 ; true ; i++ )
+		{
 
 			//Odczytanie PIPE w celu pobrania danych do przeslania do banku
 			fd = open(myfifo,O_RDONLY); 
@@ -76,7 +80,8 @@ public:
 			sendToBank(buf,host);
 			
 			const AppDataUnit *adu = NULL;
-			while ( NULL == adu ) {
+			while ( NULL == adu ) 
+			{
 				Thread::sleep(10);
 				adu = socket->getData(socket->getFirstTimestamp());
 			}		
@@ -100,7 +105,8 @@ public:
 		}
 	}
 	
-	void sendToBank(char message[],string adress){//Wyslanie danych pod wskazany adres
+	void sendToBank(char message[],string adress)
+	{//Wyslanie danych pod wskazany adres
 			
 	char port[]="10000";//Port na ktorym pracuje bank
 	char timestamp[]="1";
